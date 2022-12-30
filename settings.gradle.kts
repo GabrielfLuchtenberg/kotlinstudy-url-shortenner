@@ -1,0 +1,1 @@
+rootProject.name = "com.shortener.url-shortener"
