@@ -1,7 +1,8 @@
 package com.shortener.plugins
 
 import com.shortener.url.CreateURL
-import com.shortener.url.UrlStorage
+import com.shortener.url.UrlCommands
+import com.shortener.url.UrlQueries
 import io.ktor.server.routing.*
 import io.ktor.http.*
 import io.ktor.server.plugins.autohead.*
@@ -13,7 +14,9 @@ import org.koin.ktor.ext.inject
 fun Application.configureRouting() {
     install(AutoHeadResponse)
 
-    val urlStorage : UrlStorage by inject()
+    val urlCommands by inject<UrlCommands>()
+    val urlQueries by inject<UrlQueries>()
+
     routing {
         get("/") {
             call.respondText("Hello World!")
@@ -21,12 +24,13 @@ fun Application.configureRouting() {
 
         post("/short") {
             val url = call.receive<CreateURL>()
-            val storedUrl = urlStorage.store(url)
-            call.respond(status = HttpStatusCode.OK, message = storedUrl)
+            val storedUrl = urlCommands.create(url)
+
+            call.respondNullable(status = HttpStatusCode.OK, message = storedUrl)
         }
 
         get("/all") {
-            call.respond(listOf(urlStorage.getAll()))
+            call.respond(listOf(urlQueries.getAll()))
         }
 
         get("/{shortId}") {
@@ -37,7 +41,7 @@ fun Application.configureRouting() {
                 return@get
             }
 
-            val url = urlStorage.get(shortId)
+            val url = urlQueries.get(shortId)
             if (url == null) {
                 call.respond(HttpStatusCode.NotFound)
                 return@get

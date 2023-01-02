@@ -12,8 +12,10 @@ fun main() {
 
 fun Application.module() {
     configureDI()
+    configureDB()
     configureSerialization()
     configureMonitoring()
     configureHTTP()
     configureRouting()
+
 }
